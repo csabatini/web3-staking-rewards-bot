@@ -62,15 +62,15 @@ def swap_rewards():
         fn_args["data"]
     ).buildTransaction({
         'chainId': CHAIN_ID,
-        'gas': 90000,
-        'maxFeePerGas': w3.toWei('11', 'gwei'),
+        'gas': 100000,
+        'maxFeePerGas': w3.toWei('12', 'gwei'),
         'maxPriorityFeePerGas': w3.toWei('8.5', 'gwei'),
         'nonce': nonce,
     })
     logging.info("Swapping...")
     signed_tx = w3.eth.account.sign_transaction(tx, private_key=os.environ["PRIVATE_KEY"])
     result = w3.eth.send_raw_transaction(signed_tx.rawTransaction)  
-    receipt = web3.eth.wait_for_transaction_receipt(result)
+    receipt = w3.eth.wait_for_transaction_receipt(result)
     logging.info("Swap completed, result: {}".format(receipt["status"]))
 
 if __name__ == "__main__":
