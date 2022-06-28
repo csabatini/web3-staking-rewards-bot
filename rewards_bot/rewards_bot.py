@@ -31,13 +31,18 @@ def swap_rewards():
         'source': Path(__file__).stem
     }
     logging.info("Swap params: {}".format(params))
-    response = requests.get(ROUTER_API, headers=headers, params=params).json()
-    if response.status != 200:
+    response = requests.get(ROUTER_API, headers=headers, params=params)
+    if response.status_code != 200:
         logging.warn("Unexpected code: {} from: {}".format(response.status, ROUTER_API))
         return
     else:
         response = response.json()
-    logging.info("Response data: {}".format(response.keys()))
+    router = response['encodedData']['router']
+    abi = requests.get(FANTOM_API.format(router))
+    router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
+    logging.info("Functions: {}", router_contract.all_functions())
+    #logging.info("Router: {}".format(response['encodedData']['router']))
+    #logging.info("Data: {}".format(fn_args))
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
