@@ -62,9 +62,9 @@ def swap_rewards():
         fn_args["data"]
     ).buildTransaction({
         'chainId': CHAIN_ID,
-        'gas': 100000,
-        'maxFeePerGas': w3.toWei('12.5', 'gwei'),
-        'maxPriorityFeePerGas': w3.toWei('10', 'gwei'),
+        'gas': 850000,
+        'maxFeePerGas': w3.toWei('10', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('8.5', 'gwei'),
         'nonce': nonce,
     })
     logging.info("Swapping...")
