@@ -16,6 +16,9 @@ def get_account():
     assert private_key.startswith("0x"), "Private key must start with 0x hex prefix"
     return Account.from_key(private_key)
 
+def get_balance(account, token):
+    pass
+
 def claim_rewards():
     pass
 
@@ -39,11 +42,18 @@ def swap_rewards():
         response = response.json()
 
     router, data = response['encodedData']['router'], response['encodedData']['data']
-    abi = requests.get(FANTOM_API.format(router)).text
+    abi = requests.get(ETHSCAN_API.format(router)).text
     router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
     fn_args = router_contract.decode_function_input(data)[1]
 
     # TODO - check balance first
+    usdc_abi = requests.get(ETHSCAN_API.format(USDC_TOKEN)).text
+    usdc_contract = w3.eth.contract(Web3.toChecksumAddress(USDC_TOKEN), abi=usdc_abi)
+    balance = \
+        usdc_contract.functions.balanceOf(Web3.toChecksumAddress(account.address)).call()
+    logging.info("USDC balance: {}".format(balance))
+
+    sys.exit(0)
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
     tx = router_contract.functions.swap(account, fn_args['desc'], fn_args['data']).build_transaction({
         'chainId': CHAIN_ID,
