@@ -38,7 +38,7 @@ def swap_rewards():
         "chainId": CHAIN_ID,
         "from": USDC_TOKEN,
         "to": DEI_TOKEN,
-        "amount": str(balance)
+        "amount": str(balance),
         "receiver": account.address,
         "source": Path(__file__).stem
     }
@@ -55,13 +55,12 @@ def swap_rewards():
     router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
     fn_args = router_contract.decode_function_input(data)[1]
 
-    sys.exit(0)
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
     tx = router_contract.functions.swap(
-        Web3.toChecksumAddress(account),
+        Web3.toChecksumAddress(account.address),
         fn_args["desc"],
         fn_args["data"]
-    ).build_transaction({
+    ).buildTransaction({
         'chainId': CHAIN_ID,
         'gas': 90000,
         'maxFeePerGas': w3.toWei('11', 'gwei'),
@@ -72,7 +71,7 @@ def swap_rewards():
     signed_tx = w3.eth.account.sign_transaction(tx, private_key=os.environ["PRIVATE_KEY"])
     result = w3.eth.send_raw_transaction(signed_tx.rawTransaction)  
     receipt = web3.eth.wait_for_transaction_receipt(result)
-    logging.info("Swap completed - result: {}".format(receipt["status"]))
+    logging.info("Swap completed, result: {}".format(receipt["status"]))
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
