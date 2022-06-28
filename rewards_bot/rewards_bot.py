@@ -4,6 +4,7 @@ import logging
 import requests
 
 from web3 import HTTPProvider, Web3, WebsocketProvider
+from eth_account import Account
 from config import *
 
 w3 = Web3(HTTPProvider(RPC_URL))
