@@ -41,15 +41,22 @@ def swap_rewards():
     router, data = response['encodedData']['router'], response['encodedData']['data']
     abi = requests.get(FANTOM_API.format(router)).text
     router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
-
     fn_args = router_contract.decode_function_input(data)[1]
-    logging.info("Swap function caller: {}".format(fn_args['caller']))
-    logging.info("Swap function tuple: {}".format(fn_args['desc']))
-    logging.info("Swap function data: {}".format(fn_args['data']))
 
-    #router_contract.functions.swap(account, fn_args['desc'], fn_args['data']).call()
-    #logging.info("Router: {}".format(response['encodedData']['router']))
-    #logging.info("Data: {}".format(fn_args))
+    # TODO - check balance first
+    nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
+    tx = router_contract.functions.swap(account, fn_args['desc'], fn_args['data']).build_transaction({
+        'chainId': CHAIN_ID,
+        'gas': 90000,
+        'maxFeePerGas': w3.toWei('11', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('8.5', 'gwei'),
+        'nonce': nonce,
+    })
+    logging.info("Swapping...")
+    signed_tx = w3.eth.account.sign_transaction(tx, private_key=os.environ["PRIVATE_KEY"])
+    result = w3.eth.send_raw_transaction(signed_tx.rawTransaction)  
+    receipt = web3.eth.wait_for_transaction_receipt(result)
+    logging.info("Swap result: {}!".format(receipt['status']))
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
