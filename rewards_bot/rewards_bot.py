@@ -57,14 +57,14 @@ def swap_rewards():
 
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
     tx = router_contract.functions.swap(
-        Web3.toChecksumAddress(account.address),
+        Web3.toChecksumAddress(fn_args["caller"]),
         fn_args["desc"],
         fn_args["data"]
     ).buildTransaction({
         'chainId': CHAIN_ID,
         'gas': 100000,
-        'maxFeePerGas': w3.toWei('12', 'gwei'),
-        'maxPriorityFeePerGas': w3.toWei('8.5', 'gwei'),
+        'maxFeePerGas': w3.toWei('12.5', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('10', 'gwei'),
         'nonce': nonce,
     })
     logging.info("Swapping...")
