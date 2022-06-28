@@ -31,7 +31,13 @@ def swap_rewards():
         'source': Path(__file__).stem
     }
     logging.info("Swap params: {}".format(params))
-
+    response = requests.get(ROUTER_API, headers=headers, params=params).json()
+    if response.status != 200:
+        logging.warn("Unexpected code: {} from: {}".format(response.status, ROUTER_API))
+        return
+    else:
+        response = response.json()
+    logging.info("Response data: {}".format(response.keys()))
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
