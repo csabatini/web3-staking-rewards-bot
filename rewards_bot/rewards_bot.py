@@ -3,6 +3,7 @@ import sys
 import logging
 import requests
 
+from pathlib import Path
 from web3 import HTTPProvider, Web3, WebsocketProvider
 from eth_account import Account
 from config import *
@@ -20,7 +21,16 @@ def claim_rewards():
 
 def swap_rewards():
     account = get_account()
-    logging.info("Found account: {}".format(account.address))
+    headers = {'Content-Type': 'application/json'}
+    params = {
+        'chainId': CHAIN_ID,
+        'from': FROM_TOKEN,
+        'to': TO_TOKEN,
+        'amount': '14992500000000000000',
+        'receiver': account.address,
+        'source': Path(__file__).stem
+    }
+    logging.info("Swap params: {}".format(params))
 
 
 if __name__ == "__main__":
