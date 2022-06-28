@@ -24,14 +24,14 @@ def claim_rewards():
 
 def swap_rewards():
     account = get_account()
-    headers = {'Content-Type': 'application/json'}
+    headers = {"Content-Type": "application/json"}
     params = {
-        'chainId': CHAIN_ID,
-        'from': FROM_TOKEN,
-        'to': TO_TOKEN,
-        'amount': '14992500000000000000',
-        'receiver': account.address,
-        'source': Path(__file__).stem
+        "chainId": CHAIN_ID,
+        "from": FROM_TOKEN,
+        "to": TO_TOKEN,
+        "amount": "14992500000000000000",
+        "receiver": account.address,
+        "source": Path(__file__).stem
     }
     logging.info("Swap params: {}".format(params))
     response = requests.get(ROUTER_API, headers=headers, params=params)
@@ -41,13 +41,13 @@ def swap_rewards():
     else:
         response = response.json()
 
-    router, data = response['encodedData']['router'], response['encodedData']['data']
-    abi = requests.get(ETHSCAN_API.format(router, ETHSCAN_API_KEY)).text
+    router, data = response["encodedData"]["router"], response["encodedData"]["data"]
+    abi = requests.get(ETHSCAN_API.format(router,  os.environ["ETHSCAN_API_KEY"])).text
     router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
     fn_args = router_contract.decode_function_input(data)[1]
 
     # TODO - check balance first
-    usdc_abi = requests.get(ETHSCAN_API.format(USDC_TOKEN, ETHSCAN_API_KEY)).text
+    usdc_abi = requests.get(ETHSCAN_API.format(USDC_TOKEN, os.environ["ETHSCAN_API_KEY"])).text
     usdc_contract = w3.eth.contract(Web3.toChecksumAddress(USDC_TOKEN), abi=usdc_abi)
     balance = \
         usdc_contract.functions.balanceOf(Web3.toChecksumAddress(account.address)).call()
@@ -55,7 +55,7 @@ def swap_rewards():
 
     sys.exit(0)
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
-    tx = router_contract.functions.swap(account, fn_args['desc'], fn_args['data']).build_transaction({
+    tx = router_contract.functions.swap(account, fn_args["desc"], fn_args["data"]).build_transaction({
         'chainId': CHAIN_ID,
         'gas': 90000,
         'maxFeePerGas': w3.toWei('11', 'gwei'),
@@ -66,13 +66,13 @@ def swap_rewards():
     signed_tx = w3.eth.account.sign_transaction(tx, private_key=os.environ["PRIVATE_KEY"])
     result = w3.eth.send_raw_transaction(signed_tx.rawTransaction)  
     receipt = web3.eth.wait_for_transaction_receipt(result)
-    logging.info("Swap result: {}!".format(receipt['status']))
+    logging.info("Swap result: {}!".format(receipt["status"]))
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
     try:
         os.environ["ETHSCAN_API_KEY"]
-    except KeyError, e:
-        logging.exception('Missing required environment variable ETHSCAN_API_KEY', e)
+    except KeyError as e:
+        logging.exception('Missing required environment variable ETHSCAN_API_KEY')
         sys.exit(1)
     swap_rewards()
