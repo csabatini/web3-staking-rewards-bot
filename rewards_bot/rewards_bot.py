@@ -42,12 +42,12 @@ def swap_rewards():
         response = response.json()
 
     router, data = response['encodedData']['router'], response['encodedData']['data']
-    abi = requests.get(ETHSCAN_API.format(router)).text
+    abi = requests.get(ETHSCAN_API.format(router, ETHSCAN_API_KEY)).text
     router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
     fn_args = router_contract.decode_function_input(data)[1]
 
     # TODO - check balance first
-    usdc_abi = requests.get(ETHSCAN_API.format(USDC_TOKEN)).text
+    usdc_abi = requests.get(ETHSCAN_API.format(USDC_TOKEN, ETHSCAN_API_KEY)).text
     usdc_contract = w3.eth.contract(Web3.toChecksumAddress(USDC_TOKEN), abi=usdc_abi)
     balance = \
         usdc_contract.functions.balanceOf(Web3.toChecksumAddress(account.address)).call()
@@ -70,4 +70,9 @@ def swap_rewards():
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
+    try:
+        os.environ["ETHSCAN_API_KEY"]
+    except KeyError, e:
+        logging.exception('Missing required environment variable ETHSCAN_API_KEY', e)
+        sys.exit(1)
     swap_rewards()
