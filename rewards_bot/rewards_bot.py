@@ -37,10 +37,17 @@ def swap_rewards():
         return
     else:
         response = response.json()
-    router = response['encodedData']['router']
-    abi = requests.get(FANTOM_API.format(router))
+
+    router, data = response['encodedData']['router'], response['encodedData']['data']
+    abi = requests.get(FANTOM_API.format(router)).text
     router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
-    logging.info("Functions: {}", router_contract.all_functions())
+
+    fn_args = router_contract.decode_function_input(data)[1]
+    logging.info("Swap function caller: {}".format(fn_args['caller']))
+    logging.info("Swap function tuple: {}".format(fn_args['desc']))
+    logging.info("Swap function data: {}".format(fn_args['data']))
+
+    #router_contract.functions.swap(account, fn_args['desc'], fn_args['data']).call()
     #logging.info("Router: {}".format(response['encodedData']['router']))
     #logging.info("Data: {}".format(fn_args))
 
