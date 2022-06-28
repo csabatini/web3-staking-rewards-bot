@@ -17,13 +17,22 @@ def get_account():
     return Account.from_key(private_key)
 
 def get_balance(account, token):
-    pass
+    token_abi = requests.get(ETHSCAN_API.format(token, os.environ["ETHSCAN_API_KEY"])).text
+    token_contract = w3.eth.contract(Web3.toChecksumAddress(USDC_TOKEN), abi=token_abi)
+    balance = \
+        token_contract.functions.balanceOf(Web3.toChecksumAddress(account.address)).call()
+    return balance
 
 def claim_rewards():
     pass
 
 def swap_rewards():
     account = get_account()
+    balance = get_balance(account, USDC_TOKEN)
+    logging.info("Account: {}".format(account.address))
+    logging.info("USDC balance: {}".format(balance))
+    sys.exit(0)
+
     headers = {"Content-Type": "application/json"}
     params = {
         "chainId": CHAIN_ID,
@@ -46,12 +55,6 @@ def swap_rewards():
     router_contract = w3.eth.contract(Web3.toChecksumAddress(router), abi=abi)
     fn_args = router_contract.decode_function_input(data)[1]
 
-    # TODO - check balance first
-    usdc_abi = requests.get(ETHSCAN_API.format(USDC_TOKEN, os.environ["ETHSCAN_API_KEY"])).text
-    usdc_contract = w3.eth.contract(Web3.toChecksumAddress(USDC_TOKEN), abi=usdc_abi)
-    balance = \
-        usdc_contract.functions.balanceOf(Web3.toChecksumAddress(account.address)).call()
-    logging.info("USDC balance: {}".format(balance))
 
     sys.exit(0)
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
