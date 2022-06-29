@@ -24,8 +24,7 @@ def get_balance(account, token):
     return balance
 
 def claim_rewards():
-    reward_abi = requests.get(ETHSCAN_API.format(REWARD_CONTRACT_ADDRESS, os.environ["ETHSCAN_API_KEY"])).text
-    reward_contract = w3.eth.contract(Web3.toChecksumAddress(REWARD_CONTRACT_ADDRESS), abi=reward_abi)
+    reward_contract = w3.eth.contract(Web3.toChecksumAddress(REWARD_CONTRACT_ADDRESS), abi=REWARD_ABI)
     logging.info(reward_contract.all_functions())
 
 def swap_rewards():
