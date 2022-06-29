@@ -28,7 +28,7 @@ def claim_rewards():
     reward_abi = requests.get(ETHSCAN_API.format(REWARD_CONTRACT_ADDRESS,  os.environ["ETHSCAN_API_KEY"])).text
     reward_contract = w3.eth.contract(Web3.toChecksumAddress(REWARD_CONTRACT_ADDRESS), abi=reward_abi)
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
-    claim_tx = router_contract.functions.harvest(REWARD_POOL_ID, Web3.toChecksumAddress(account.address)).buildTransaction({
+    claim_tx = reward_contract.functions.harvest(REWARD_POOL_ID, Web3.toChecksumAddress(account.address)).buildTransaction({
         'chainId': CHAIN_ID,
         'gas': 150000,
         'maxFeePerGas': w3.toWei('5', 'gwei'),
@@ -46,7 +46,7 @@ def swap_rewards():
     balance = get_balance(account, FROM_TOKEN)
     logging.info("Account: {}, Balance: {}".format(account.address, balance))
     if (balance == 0):
-        logging.info("Zero balance - nothingto swap")
+        logging.info("Zero balance - nothing to swap")
         return
     headers = {"Content-Type": "application/json"}
     params = {
