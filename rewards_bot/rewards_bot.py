@@ -18,7 +18,7 @@ def get_account():
 
 def get_balance(account, token):
     token_abi = requests.get(ETHSCAN_API.format(token, os.environ["ETHSCAN_API_KEY"])).text
-    token_contract = w3.eth.contract(Web3.toChecksumAddress(USDC_TOKEN), abi=token_abi)
+    token_contract = w3.eth.contract(Web3.toChecksumAddress(token), abi=token_abi)
     balance = \
         token_contract.functions.balanceOf(Web3.toChecksumAddress(account.address)).call()
     return balance
