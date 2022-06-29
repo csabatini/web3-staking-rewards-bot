@@ -24,7 +24,9 @@ def get_balance(account, token):
     return balance
 
 def claim_rewards():
-    pass
+    reward_abi = requests.get(ETHSCAN_API.format(REWARD_CONTRACT_ADDRESS, os.environ["ETHSCAN_API_KEY"])).text
+    reward_contract = w3.eth.contract(Web3.toChecksumAddress(REWARD_CONTRACT_ADDRESS), abi=reward_abi)
+    logging.info(reward_contract.all_functions())
 
 def swap_rewards():
     account = get_account()
@@ -80,4 +82,6 @@ if __name__ == "__main__":
     except KeyError as e:
         logging.exception('Missing required environment variable ETHSCAN_API_KEY')
         sys.exit(1)
+    claim_rewards()
+    sys.exit(0)
     swap_rewards()
