@@ -24,8 +24,10 @@ def get_balance(account, token):
     return balance
 
 def claim_rewards():
+    account = get_account()
     reward_contract = w3.eth.contract(Web3.toChecksumAddress(REWARD_CONTRACT_ADDRESS), abi=REWARD_ABI)
-    logging.info(reward_contract.all_functions())
+    #logging.info(reward_contract.all_functions())
+    logging.info(reward_contract.functions.userNftDeposits(Web3.toChecksumAddress(account.address)).call())
 
 def swap_rewards():
     account = get_account()
