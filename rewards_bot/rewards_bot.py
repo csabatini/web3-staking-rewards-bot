@@ -27,21 +27,32 @@ def claim_rewards():
     account = get_account()
     reward_abi = requests.get(ETHSCAN_API.format(REWARD_CONTRACT_ADDRESS,  os.environ["ETHSCAN_API_KEY"])).text
     reward_contract = w3.eth.contract(Web3.toChecksumAddress(REWARD_CONTRACT_ADDRESS), abi=reward_abi)
-    logging.info(reward_contract.all_functions())
-    #logging.info(reward_contract.functions.userNftDeposits(Web3.toChecksumAddress(account.address)).call())
+    nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
+    claim_tx = router_contract.functions.harvest(REWARD_POOL_ID, Web3.toChecksumAddress(account.address)).buildTransaction({
+        'chainId': CHAIN_ID,
+        'gas': 150000,
+        'maxFeePerGas': w3.toWei('5', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('1.5', 'gwei'),
+        'nonce': nonce,
+    })
+    logging.info("Claiming rewards...")
+    signed_tx = w3.eth.account.sign_transaction(claim_tx, private_key=os.environ["PRIVATE_KEY"])
+    result = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    receipt = w3.eth.wait_for_transaction_receipt(result)
+    logging.info("Claim rewards completed, result: {}".format(receipt["status"]))
 
 def swap_rewards():
     account = get_account()
-    balance = get_balance(account, USDC_TOKEN)
-    logging.info("Account: {}, USDC: {}".format(account.address, balance))
+    balance = get_balance(account, FROM_TOKEN)
+    logging.info("Account: {}, Balance: {}".format(account.address, balance))
     if (balance == 0):
         logging.info("Zero balance - nothingto swap")
         return
     headers = {"Content-Type": "application/json"}
     params = {
         "chainId": CHAIN_ID,
-        "from": USDC_TOKEN,
-        "to": DEI_TOKEN,
+        "from": FROM_TOKEN,
+        "to": TO_TOKEN,
         "amount": str(balance),
         "receiver": account.address,
         "source": Path(__file__).stem
@@ -60,7 +71,7 @@ def swap_rewards():
     fn_args = router_contract.decode_function_input(data)[1]
 
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
-    tx = router_contract.functions.swap(
+    swap_tx = router_contract.functions.swap(
         Web3.toChecksumAddress(fn_args["caller"]),
         fn_args["desc"],
         fn_args["data"]
@@ -72,7 +83,7 @@ def swap_rewards():
         'nonce': nonce,
     })
     logging.info("Swapping...")
-    signed_tx = w3.eth.account.sign_transaction(tx, private_key=os.environ["PRIVATE_KEY"])
+    signed_tx = w3.eth.account.sign_transaction(swap_tx, private_key=os.environ["PRIVATE_KEY"])
     result = w3.eth.send_raw_transaction(signed_tx.rawTransaction)  
     receipt = w3.eth.wait_for_transaction_receipt(result)
     logging.info("Swap completed, result: {}".format(receipt["status"]))
@@ -85,5 +96,4 @@ if __name__ == "__main__":
         logging.exception('Missing required environment variable ETHSCAN_API_KEY')
         sys.exit(1)
     claim_rewards()
-    sys.exit(0)
     swap_rewards()
