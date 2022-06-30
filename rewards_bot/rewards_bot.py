@@ -30,9 +30,9 @@ def claim_rewards():
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
     claim_tx = reward_contract.functions.harvest(REWARD_POOL_ID, Web3.toChecksumAddress(account.address)).buildTransaction({
         'chainId': CHAIN_ID,
-        'gas': 150000,
-        'maxFeePerGas': w3.toWei('5', 'gwei'),
-        'maxPriorityFeePerGas': w3.toWei('1.5', 'gwei'),
+        'gas': 300000,
+        'maxFeePerGas': w3.toWei('12.5', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('7.5', 'gwei'),
         'nonce': nonce,
     })
     logging.info("Claiming rewards...")
@@ -60,7 +60,7 @@ def swap_rewards():
     logging.info("Swap params: {}".format(params))
     response = requests.get(ROUTER_API, headers=headers, params=params)
     if response.status_code != 200:
-        logging.warn("Unexpected code: {} from: {}".format(response.status, ROUTER_API))
+        logging.warn("Unexpected code: {} from: {}".format(response.status_code, ROUTER_API))
         return
     else:
         response = response.json()
@@ -78,7 +78,7 @@ def swap_rewards():
     ).buildTransaction({
         'chainId': CHAIN_ID,
         'gas': 850000,
-        'maxFeePerGas': w3.toWei('10', 'gwei'),
+        'maxFeePerGas': w3.toWei('15', 'gwei'),
         'maxPriorityFeePerGas': w3.toWei('8.5', 'gwei'),
         'nonce': nonce,
     })
