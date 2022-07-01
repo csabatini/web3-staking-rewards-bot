@@ -30,9 +30,9 @@ def claim_rewards():
     nonce = w3.eth.get_transaction_count(Web3.toChecksumAddress(account.address))
     claim_tx = reward_contract.functions.harvest(REWARD_POOL_ID, Web3.toChecksumAddress(account.address)).buildTransaction({
         'chainId': CHAIN_ID,
-        'gas': 300000,
-        'maxFeePerGas': w3.toWei('12.5', 'gwei'),
-        'maxPriorityFeePerGas': w3.toWei('7.5', 'gwei'),
+        'gas': 500000,
+        'maxFeePerGas': w3.toWei('16', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('9.5', 'gwei'),
         'nonce': nonce,
     })
     logging.info("Claiming rewards...")
@@ -77,9 +77,9 @@ def swap_rewards():
         fn_args["data"]
     ).buildTransaction({
         'chainId': CHAIN_ID,
-        'gas': 850000,
-        'maxFeePerGas': w3.toWei('15', 'gwei'),
-        'maxPriorityFeePerGas': w3.toWei('8.5', 'gwei'),
+        'gas': 900000,
+        'maxFeePerGas': w3.toWei('20', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('10', 'gwei'),
         'nonce': nonce,
     })
     logging.info("Swapping...")
@@ -93,7 +93,15 @@ if __name__ == "__main__":
     try:
         os.environ["ETHSCAN_API_KEY"]
     except KeyError as e:
-        logging.exception('Missing required environment variable ETHSCAN_API_KEY')
+        logging.exception("Missing required environment variable ETHSCAN_API_KEY")
         sys.exit(1)
-    claim_rewards()
-    swap_rewards()
+    try:
+        claim_rewards()
+    except Exception as e:
+        logging.exception("Encountered an error while claiming")
+        sys.exit(1)
+    try:
+        swap_rewards()
+    except Exception as e:
+        logging.exception("Encountered an error while swapping")
+        sys.exit(1)
