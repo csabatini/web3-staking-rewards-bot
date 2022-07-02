@@ -1,6 +1,8 @@
 CHAIN_ID = 250
 LOG_FORMAT = "%(asctime)s logLevel=%(levelname)s logger=%(name)s - %(message)s"
-RPC_URL = "https://rpc.ftm.tools/"
+#RPC_URL = "https://rpc.ftm.tools/"
+#RPC_URL = "https://rpc.ankr.com/fantom"
+RPC_URL = "https://rpcapi.fantom.network"
 ROUTER_API = "https://router.firebird.finance/aggregator/v1/route"
 ETHSCAN_API = "http://api.ftmscan.com/api?module=contract&action=getabi&address={}&format=raw&apikey={}"
 FROM_TOKEN = "0xde5ed76e7c05ec5e4572cfc88d1acea165109e44" # DEUS
